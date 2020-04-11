@@ -103,6 +103,7 @@ player = {
         tile_x = 2,
         tile_y = 2
     }
+assert(player.animation~=nil, "come on")
 k=#r
 end
 function love.draw()
@@ -151,8 +152,10 @@ function love.keypressed(key)
         player.animation=animationz.anim_right
     elseif key == "r" then
         y = y - 1
+        player.animation=animationz.anim_above
     elseif key == "f" then
         y = y + 1
+        player.animation=animationz.anim_bottom
     end
 
    if isEmpty(x, y) then
