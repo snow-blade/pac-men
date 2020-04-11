@@ -1,8 +1,41 @@
 
+function slice(tbl, first, last, step)
+  local sliced = {}
+
+  for i = first or 1, last or #tbl, step or 1 do
+    sliced[#sliced+1] = tbl[i]
+  end
+  return sliced
+end
+
+
+function shuffle(tbl)
+  love.math.getRandomSeed(os.time())
+  for i = #tbl, 2, -1 do
+    local j = love.math.random(i)
+    tbl[i], tbl[j] = tbl[j], tbl[i]
+  end
+  return tbl
+end
 function isEmpty(x, y)
     return tilemap[y][x] == 0
 end
+
+function spawn_random_coins(tab,number_of_coins)
+    pos={}
+    table.insert(pos, {2,2})
+    for i,el in ipairs(tab) do
+       for j,el2 in ipairs(el) do 
+           if el2==0 then
+            table.insert(pos,{i,j})
+              end
+       end 
+    end
+    assert(number_of_coins<#pos,"the number of coins should be less than the numer of blanks")
+    return slice(shuffle(pos),1,number_of_coins)
+end
 function love.load()
+    require("animations")
     animator=require("animator")
     sfx = love.audio.newSource("sfx.ogg", "static")
     --Load the image
@@ -11,19 +44,13 @@ function love.load()
     --We need the full image width and height for creating the quads
     local image_width = image:getWidth()
     local image_height = image:getHeight()
-    one = love.graphics.newImage("1.png")
-    two = love.graphics.newImage("2.png")
-    three = love.graphics.newImage("3.png")
-    four = love.graphics.newImage("4.png")
-    five = love.graphics.newImage("5.png")
-    print(five:getHeight())
-    anim = animator.newAnimation( { one, two, three, four,five }, { 1, 1, 1, 1,1 })
-    anim:setLooping()
+    
     --The width and height of each tile is 32, 32
     --So we could do:
     rotation=0
     width = 32
     height = 32
+
     --But let's say we don't know the width and height of a tile
     --We can also use the number of rows and columns in the tileset
     --Our tileset has 2 rows and 3 columns
@@ -67,18 +94,16 @@ function love.load()
     {3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 3},
     {3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 3},--18
     {3, 0, 6, 0, 6, 0, 6, 0, 6, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3},--20
-    {4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5},--21
-
-
-    
+    {4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5},--21    
 }
+r=spawn_random_coins(tilemap,250)
 player = {
         image = love.graphics.newImage("player.png"),
-        animation = anim,
+        animation=animationz.anim_right,
         tile_x = 2,
         tile_y = 2
     }
-
+k=#r
 end
 function love.draw()
     for i,row in ipairs(tilemap) do
@@ -88,23 +113,42 @@ function love.draw()
                    --Draw the image with the correct quad
                    love.graphics.draw(im, j * width, i * height)
                end    
+             for k=1,#r do  
+                for l=1,k do
+               if i==r[k][l] and j==r[k][l+1] then
+                            love.graphics.rectangle('fill', j*width+10, i*height+10, 10,10)
+                         end end end
            end
        end
-       anim:draw(player.tile_x * width, player.tile_y * height,rotation,0.15,0.15)
+       player.animation:draw(player.tile_x * width, player.tile_y * height,rotation,0.15,0.15)
        --Draw the player and multiple its tile position with the tile width and height
   --     love.graphics.draw(player.image, player.tile_x * width, player.tile_y * height)
 end
 function love.update(dt)
-    anim:update( dt*10 )
-end
+    player.animation:update( dt*10 )
+    for i=1,k do
+              --[[  print("player.tile_x: "..tostring(player.tile_x))
+                print("player.tile_y: "..tostring(player.tile_y))
+                print("k"..tostring(k))
+                print("r[k][l]: "..tostring(r[k][1]))
+                print("r[k][l+1]: "..tostring(r[k][2])) ]]--
+                if r[i]~=nil and player.tile_y==r[i][1] and player.tile_x==r[i][2] then 
+                table.remove(r, i)
+                i=1
+                print("collision") 
+               end  
+        end
+ end
 function love.keypressed(key)
     local x = player.tile_x
     local y = player.tile_y
 
     if key == "d" then
         x = x - 1
+        player.animation=animationz.anim_left
     elseif key == "g" then
         x = x + 1
+        player.animation=animationz.anim_right
     elseif key == "r" then
         y = y - 1
     elseif key == "f" then
