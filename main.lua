@@ -4,18 +4,13 @@ end
 function love.load()
 ---   requires-----------------
     require("coins")
+    tick=require("tick")
     Grid=require("jumper.grid")
     Pathfinder=require("jumper.pathfinder")
     Object=require("classic")
-    -- Creates a grid object
-    local grid = Grid(map) 
-    -- Creates a pathfinder object using Jump Point Search
-    local myFinder = Pathfinder(grid, 'JPS', walkable) 
-    require("enemy")
     require("player")
     require("animations")
     animator=require("animator")
-    enemy=Enemy(18,10)
     require("tilemap")
 -------------------------------
     --Load the image
@@ -25,14 +20,20 @@ function love.load()
      height = im:getHeight()
     im_rotation=0
     tilemap=tilemaps.tilemap
-r=spawn_random_coins(tilemap,250)
------------create a new player---------------------------
-player = Player(
+    grid = Grid(tilemap) 
+    myFinder = Pathfinder(grid, 'BFS', 0) 
+        -- Creates a grid object
+    -- Creates a pathfinder object using Jump Point Search
+    player = Player(
        love.graphics.newImage("player.png"),
        animationz.anim_right,
        2,
        2
 )
+    require("enemy")
+    enemy=Enemy(18,10)
+r=spawn_random_coins(tilemap,250)
+-----------create a new player---------------------------
 assert(player.animation~=nil, "no animation")
 --------------------------------------------------------
 len=#r
