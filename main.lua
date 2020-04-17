@@ -60,6 +60,7 @@ end
 function love.update(dt)
   --animate the player at 0 fps
     enemy:update(dt)
+    enemy:follow()
     player:update(dt)
     for i=1,len do
                 if r[i]~=nil and player.tile_y==r[i][1] and player.tile_x==r[i][2] then 
