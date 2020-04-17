@@ -4,7 +4,13 @@ end
 function love.load()
 ---   requires-----------------
     require("coins")
+    Grid=require("jumper.grid")
+    Pathfinder=require("jumper.pathfinder")
     Object=require("classic")
+    -- Creates a grid object
+    local grid = Grid(map) 
+    -- Creates a pathfinder object using Jump Point Search
+    local myFinder = Pathfinder(grid, 'JPS', walkable) 
     require("enemy")
     require("player")
     require("animations")
