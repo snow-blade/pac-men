@@ -4,8 +4,12 @@ end
 function love.load()
 ---   requires-----------------
     require("coins")
+    Object=require("classic")
+    require("enemy")
+    require("player")
     require("animations")
     animator=require("animator")
+    enemy=Enemy(18,10)
     require("tilemap")
 -------------------------------
     --Load the image
@@ -17,17 +21,18 @@ function love.load()
     tilemap=tilemaps.tilemap
 r=spawn_random_coins(tilemap,250)
 -----------create a new player---------------------------
-player = {
-        image = love.graphics.newImage("player.png"),
-        animation=animationz.anim_right,
-        tile_x = 2,
-        tile_y = 2
-    }
+player = Player(
+       love.graphics.newImage("player.png"),
+       animationz.anim_right,
+       2,
+       2
+)
 assert(player.animation~=nil, "no animation")
 --------------------------------------------------------
 len=#r
 end
 function love.draw()
+    enemy:draw()
     for i,row in ipairs(tilemap) do
         for j,tile in ipairs(row) do
                if tile ~= 0 then
@@ -43,11 +48,12 @@ function love.draw()
            end
        end
         --Draw the player and multiple its tile position with the tile width and height
-        player.animation:draw(player.tile_x * width, player.tile_y * height,im_rotation,0.15,0.15)
+        player:draw()
 end
 function love.update(dt)
   --animate the player at 0 fps
-    player.animation:update( dt*20 )
+    enemy:update(dt)
+    player:update(dt)
     for i=1,len do
                 if r[i]~=nil and player.tile_y==r[i][1] and player.tile_x==r[i][2] then 
                 table.remove(r, i)
